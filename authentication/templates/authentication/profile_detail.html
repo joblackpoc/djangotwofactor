@@ -1,0 +1,35 @@
+{% extends 'authentication/base.html' %}
+
+{% block title %}Profile Detail{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3>{{ profile.user.username }}'s Profile</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" class="img-fluid rounded" alt="Profile Picture">
+                    {% endif %}
+                </div>
+                <div class="col-md-8">
+                    <p><strong>Username:</strong> {{ profile.user.username }}</p>
+                    <p><strong>Email:</strong> {{ profile.user.email }}</p>
+                    <p><strong>Phone:</strong> {{ profile.phone|default:"Not provided" }}</p>
+                    <p><strong>Address:</strong> {{ profile.address|default:"Not provided" }}</p>
+                    
+                    {% if request.user == profile.user or request.user.is_staff %}
+                    <div class="mt-3">
+                        <a href="{% url 'authentication:profile_update' profile.pk %}" class="btn btn-warning">Edit Profile</a>
+                        <a href="{% url 'authentication:profile_delete' profile.pk %}" class="btn btn-danger">Delete Profile</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

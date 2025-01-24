@@ -1,0 +1,102 @@
+#header {
+    background: #2c3e50;
+    color: #fff;
+}
+
+/* Link colors */
+a:link, a:visited {
+    color: #2980b9;
+}
+
+/* List view enhancements */
+#changelist table thead th {
+    background: #34495e;
+    color: #fff;
+}
+
+#changelist table tbody tr:hover {
+    background: #f5f6fa;
+}
+
+/* Form styling */
+.form-row {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.form-row:last-child {
+    border-bottom: none;
+}
+
+/* PDF preview enhancements */
+.pdf-preview {
+    margin: 10px 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.pdf-preview a.button {
+    display: inline-block;
+    padding: 8px 15px;
+    background: #2980b9;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.pdf-preview a.button:hover {
+    background: #3498db;
+}
+
+/* Custom fieldset styling */
+.module {
+    margin-bottom: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.module h2 {
+    background: #34495e;
+    color: #fff;
+    padding: 10px;
+    margin: 0;
+}
+
+/* Filter sidebar */
+#changelist-filter h2 {
+    background: #2c3e50;
+    padding: 10px;
+    margin: 0;
+    color: #fff;
+}
+
+#changelist-filter li.selected {
+    border-left: 3px solid #2980b9;
+}
+
+/* Action buttons */
+.object-tools a:link, .object-tools a:visited {
+    background: #2980b9;
+}
+
+.object-tools a:hover {
+    background: #3498db;
+}
+
+/* Message styling */
+.success {
+    background: #27ae60;
+}
+
+.warning {
+    background: #f1c40f;
+}
+
+.error {
+    background: #e74c3c;
+}

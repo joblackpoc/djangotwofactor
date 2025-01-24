@@ -1,0 +1,147 @@
+<!-- templates/main/post_form.html -->
+{% extends 'main/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<style>
+    .select2-container--bootstrap-5 .select2-selection {
+        min-height: 38px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">{{ title }}</h2>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Title Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.title.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Categories Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.categories.id_for_label }}" class="form-label">Categories</label>
+                            {{ form.categories }}
+                            {% if form.categories.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.categories.errors }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Hold Ctrl/Cmd to select multiple categories</div>
+                        </div>
+
+                        <!-- Featured Image Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.featured_image.id_for_label }}" class="form-label">Featured Image</label>
+                            {{ form.featured_image }}
+                            {% if form.featured_image.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.featured_image.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Content Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.content.id_for_label }}" class="form-label">Content</label>
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.content.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Status Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.status.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Checkboxes -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    {{ form.featured }}
+                                    <label class="form-check-label" for="{{ form.featured.id_for_label }}">
+                                        Featured Post
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    {{ form.allow_comments }}
+                                    <label class="form-check-label" for="{{ form.allow_comments.id_for_label }}">
+                                        Allow Comments
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">{{ submit_text|default:"Submit" }}</button>
+                            <a href="{% url 'main:post_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ form.media }}  <!-- CKEditor's JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize Select2 for categories
+        $('#{{ form.categories.id_for_label }}').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select categories',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Preview image when selected
+        $('#{{ form.featured_image.id_for_label }}').change(function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if ($('#image-preview').length) {
+                        $('#image-preview').attr('src', e.target.result);
+                    } else {
+                        const img = $('<img id="image-preview" class="mt-2 img-fluid" style="max-height: 200px;">');
+                        img.attr('src', e.target.result);
+                        $('#{{ form.featured_image.id_for_label }}').after(img);
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+</script>
+{% endblock %}

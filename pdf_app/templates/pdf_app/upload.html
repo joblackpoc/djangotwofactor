@@ -1,0 +1,171 @@
+<!-- pdf_app/templates/pdf_app/upload.html -->
+{% extends 'pdf_app/base.html' %}
+{% load static %}
+
+{% block title %}Upload PDF Document{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-file-earmark-pdf"></i> Upload PDF Document</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Title Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                            <input type="text" name="{{ form.title.name }}"
+                                   class="form-control {% if form.title.errors %}is-invalid{% endif %}"
+                                   id="{{ form.title.id_for_label }}" required>
+                            {% if form.title.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.title.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                            <textarea name="{{ form.description.name }}"
+                                      class="form-control {% if form.description.errors %}is-invalid{% endif %}"
+                                      id="{{ form.description.id_for_label }}" rows="3"></textarea>
+                            {% if form.description.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.description.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Category Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+                            <select name="{{ form.category.name }}"
+                                    class="form-select {% if form.category.errors %}is-invalid{% endif %}"
+                                    id="{{ form.category.id_for_label }}" required>
+                                <option value="">Select a category...</option>
+                                {% for value, label in form.category.field.choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if form.category.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.category.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Subcategory Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.subcategory.id_for_label }}" class="form-label">Subcategory</label>
+                            <select name="{{ form.subcategory.name }}"
+                                    class="form-select {% if form.subcategory.errors %}is-invalid{% endif %}"
+                                    id="{{ form.subcategory.id_for_label }}">
+                                <option value="">Select a subcategory...</option>
+                                {% for value, label in form.subcategory.field.choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if form.subcategory.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.subcategory.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- PDF File Upload -->
+                        <div class="mb-3">
+                            <label for="{{ form.pdf_file.id_for_label }}" class="form-label">PDF File</label>
+                            <input type="file" name="{{ form.pdf_file.name }}"
+                                   class="form-control {% if form.pdf_file.errors %}is-invalid{% endif %}"
+                                   id="{{ form.pdf_file.id_for_label }}"
+                                   accept=".pdf"
+                                   required>
+                            {% if form.pdf_file.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.pdf_file.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Maximum file size: 10MB</div>
+                        </div>
+
+                        <!-- Privacy Setting -->
+                        <div class="mb-3">
+                            <label for="{{ form.privacy.id_for_label }}" class="form-label">Privacy Setting</label>
+                            <select name="{{ form.privacy.name }}"
+                                    class="form-select {% if form.privacy.errors %}is-invalid{% endif %}"
+                                    id="{{ form.privacy.id_for_label }}" required>
+                                {% for value, label in form.privacy.field.choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if form.privacy.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.privacy.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-upload"></i> Upload PDF
+                            </button>
+                            <a href="{% url 'pdf_app:pdf_list' %}" class="btn btn-secondary">
+                                <i class="bi bi-x"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Dynamic subcategories based on selected category
+document.getElementById('{{ form.category.id_for_label }}').addEventListener('change', function() {
+    const categoryId = this.value;
+    const subcategorySelect = document.getElementById('{{ form.subcategory.id_for_label }}');
+    
+    // Clear current options
+    subcategorySelect.innerHTML = '<option value="">Select a subcategory...</option>';
+    
+    if (categoryId) {
+        fetch(`/api/subcategories/${categoryId}/`)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(subcategory => {
+                    const option = document.createElement('option');
+                    option.value = subcategory.id;
+                    option.textContent = subcategory.name;
+                    subcategorySelect.appendChild(option);
+                });
+            });
+    }
+});
+
+// File size validation
+document.getElementById('{{ form.pdf_file.id_for_label }}').addEventListener('change', function() {
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (this.files[0].size > maxSize) {
+        alert('File size exceeds 10MB limit');
+        this.value = '';
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

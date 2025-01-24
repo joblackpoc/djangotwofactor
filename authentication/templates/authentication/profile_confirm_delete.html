@@ -1,0 +1,25 @@
+{% extends 'authentication/base.html' %}
+
+{% block title %}Delete Profile{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Delete Profile</h3>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete the profile for {{ profile.user.username }}?</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                        <a href="{% url 'authentication:profile_list' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

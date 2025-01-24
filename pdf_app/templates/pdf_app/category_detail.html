@@ -1,0 +1,61 @@
+{% extends 'pdf_app/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">{{ category.name }}</h1>
+            <p class="lead">{{ category.description }}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h3>Subcategories</h3>
+            <div class="list-group">
+                {% for subcategory in subcategories %}
+                <a href="{% url 'pdf_app:subcategory_detail' subcategory.slug %}" 
+                   class="list-group-item list-group-item-action">
+                    {{ subcategory.name }}
+                    <span class="badge bg-secondary float-end">
+                        {{ subcategory.pdfs.count }} PDFs
+                    </span>
+                </a>
+                {% empty %}
+                <p class="list-group-item">No subcategories found.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h3>PDFs in this Category</h3>
+            {% for pdf in pdfs %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{% url 'pdf_app:pdf_detail' pdf.slug %}">
+                            {{ pdf.title }}
+                        </a>
+                    </h5>
+                    <p class="card-text">
+                        {{ pdf.description|truncatechars:150 }}
+                    </p>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'pdf_app:pdf_view' pdf.slug %}" 
+                           class="btn btn-sm btn-primary">
+                            View PDF
+                        </a>
+                        <small class="text-muted">
+                            Views: {{ pdf.views }} | 
+                            Uploaded: {{ pdf.created_at|date:"M d, Y" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="alert alert-info">No PDFs in this category.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

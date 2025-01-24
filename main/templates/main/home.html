@@ -1,0 +1,176 @@
+<!-- templates/main/home.html -->
+{% extends 'main/base.html' %}
+
+{% block title %}Welcome to Blog Platform{% endblock %}
+
+{% block content %}
+<!-- Featured Posts Carousel -->
+<section class="mb-5">
+    <div id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            {% for post in featured_posts %}
+            <button type="button" data-bs-target="#featuredCarousel" data-bs-slide-to="{{ forloop.counter0 }}" 
+                    {% if forloop.first %}class="active"{% endif %}></button>
+            {% endfor %}
+        </div>
+        <div class="carousel-inner">
+            {% for post in featured_posts %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                {% if post.featured_image %}
+                <img src="{{ post.featured_image.url }}" class="d-block w-100" alt="{{ post.title }}" 
+                     style="height: 400px; object-fit: cover;">
+                {% else %}
+                <img src="https://picsum.photos/1200/400" class="d-block w-100" alt="{{ post.title }}">
+                {% endif %}
+                <div class="carousel-caption d-none d-md-block">
+                    <h2>{{ post.title }}</h2>
+                    <p>{{ post.content|striptags|truncatewords:30 }}</p>
+                    <a href="{% url 'main:post_detail' post.slug %}" class="btn btn-primary">Read More</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#featuredCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#featuredCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="mb-5">
+    <div class="container">
+        <h3 class="mb-4">Popular Categories</h3>
+        <div class="row g-4">
+            {% for category in categories %}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    {% if category.image %}
+                    <img src="{{ category.image.url }}" class="card-img-top" alt="{{ category.name }}"
+                         style="height: 150px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <p class="card-text text-muted">{{ category.post_count }} posts</p>
+                        <a href="{% url 'main:category_posts' category.slug %}" class="btn btn-outline-primary">View Posts</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Latest Posts Section -->
+<section class="mb-5">
+    <div class="container">
+        <h3 class="mb-4">Latest Posts</h3>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for post in latest_posts %}
+            <div class="col">
+                <div class="card h-100">
+                    {% if post.featured_image %}
+                    <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}"
+                         style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="text-muted">
+                            <small>
+                                By {{ post.author }} | {{ post.created_date|date:"F d, Y" }}
+                            </small>
+                        </p>
+                        <p class="card-text">{{ post.content|striptags|truncatewords:20 }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'main:post_detail' post.slug %}" class="btn btn-sm btn-primary">Read More</a>
+                            <small class="text-muted">
+                                <i class="bi bi-heart-fill text-danger"></i> {{ post.total_likes }}
+                                <i class="bi bi-chat-fill text-primary ms-2"></i> {{ post.total_comments }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Popular & Trending Section -->
+<section class="mb-5">
+    <div class="container">
+        <div class="row">
+            <!-- Popular Posts -->
+            <div class="col-md-6">
+                <h3 class="mb-4">Popular Posts</h3>
+                {% for post in popular_posts %}
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-4">
+                            {% if post.featured_image %}
+                            <img src="{{ post.featured_image.url }}" class="img-fluid rounded-start" alt="{{ post.title }}"
+                                 style="height: 100%; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ post.title }}</h6>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="bi bi-eye-fill"></i> {{ post.views }} views
+                                    </small>
+                                </p>
+                                <a href="{% url 'main:post_detail' post.slug %}" class="btn btn-sm btn-outline-primary">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Trending Posts -->
+            <div class="col-md-6">
+                <h3 class="mb-4">Trending This Week</h3>
+                {% for post in trending_posts %}
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-4">
+                            {% if post.featured_image %}
+                            <img src="{{ post.featured_image.url }}" class="img-fluid rounded-start" alt="{{ post.title }}"
+                                 style="height: 100%; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ post.title }}</h6>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="bi bi-heart-fill text-danger"></i> {{ post.total_likes }} likes
+                                    </small>
+                                </p>
+                                <a href="{% url 'main:post_detail' post.slug %}" class="btn btn-sm btn-outline-primary">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize carousel with custom interval
+    document.addEventListener('DOMContentLoaded', function() {
+        new bootstrap.Carousel(document.getElementById('featuredCarousel'), {
+            interval: 5000
+        });
+    });
+</script>
+{% endblock %}

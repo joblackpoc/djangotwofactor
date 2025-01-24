@@ -1,0 +1,65 @@
+<div class="comment mb-3" id="comment-{{ comment.id }}">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <h6 class="card-subtitle mb-2 text-muted">{{ comment.author }}</h6>
+                <small class="text-muted">{{ comment.created_date|date:"F d, Y H:i" }}</small>
+            </div>
+            <p class="card-text">{{ comment.content }}</p>
+            
+            {% if user.is_authenticated %}
+            <div class="mt-2">
+                <button class="btn btn-sm btn-link p-0" 
+                        onclick="toggleReplyForm({{ comment.id }})">
+                    <i class="bi bi-reply"></i> Reply
+                </button>
+                {% if user == comment.author %}
+                <button class="btn btn-sm btn-link text-danger p-0 ms-2" 
+                        onclick="deleteComment({{ comment.id }})">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+                {% endif %}
+            </div>
+            
+            <!-- Reply Form -->
+            <div class="reply-form mt-3" id="reply-form-{{ comment.id }}" style="display: none;">
+                <form method="post" action="{% url 'main:add_reply' post.slug comment.id %}" class="reply-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea name="content" class="form-control form-control-sm" rows="2" 
+                                placeholder="Write your reply..."></textarea>
+                    </div>
+                    <div class="mt-2">
+                        <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+                        <button type="button" class="btn btn-sm btn-secondary" 
+                                onclick="toggleReplyForm({{ comment.id }})">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+            
+            <!-- Replies -->
+            <div class="replies ms-4 mt-3">
+                {% for reply in comment.get_replies %}
+                <div class="reply mb-2" id="reply-{{ reply.id }}">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="card-subtitle mb-2 text-muted">{{ reply.author }}</h6>
+                                <small class="text-muted">{{ reply.created_date|date:"F d, Y H:i" }}</small>
+                            </div>
+                            <p class="card-text">{{ reply.content }}</p>
+                            {% if user == reply.author %}
+                            <button class="btn btn-sm btn-link text-danger p-0" 
+                                    onclick="deleteReply({{ reply.id }})">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

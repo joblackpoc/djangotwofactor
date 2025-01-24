@@ -1,0 +1,58 @@
+{% extends 'pdf_app/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">
+                {{ subcategory.name }} 
+                <small class="text-muted">
+                    in {{ subcategory.category.name }}
+                </small>
+            </h1>
+            {% if subcategory.description %}
+            <p class="lead">{{ subcategory.description }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h3>PDFs in this Subcategory</h3>
+            {% for pdf in pdfs %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{% url 'pdf_app:pdf_detail' pdf.slug %}">
+                            {{ pdf.title }}
+                        </a>
+                    </h5>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Category: {{ pdf.category.name }} | 
+                            Subcategory: {{ pdf.subcategory.name }}
+                        </small>
+                    </p>
+                    <p class="card-text">
+                        {{ pdf.description|truncatechars:150 }}
+                    </p>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'pdf_app:pdf_view' pdf.slug %}" 
+                           class="btn btn-sm btn-primary">
+                            View PDF
+                        </a>
+                        <small class="text-muted">
+                            Views: {{ pdf.views }} | 
+                            Uploaded: {{ pdf.created_at|date:"M d, Y" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="alert alert-info">No PDFs in this subcategory.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

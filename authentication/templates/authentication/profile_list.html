@@ -1,0 +1,42 @@
+{% extends 'authentication/base.html' %}
+
+{% block title %}Profiles{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>User Profiles</h2>
+        <a href="{% url 'authentication:profile_create' %}" class="btn btn-primary">Create New Profile</a>
+    </div>
+    
+    <div class="row">
+        {% for profile in profiles %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                {% if profile.profile_picture %}
+                <img src="{{ profile.profile_picture.url }}" class="card-img-top" alt="Profile Picture">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ profile.user.username }}</h5>
+                    <p class="card-text">
+                        Phone: {{ profile.phone|default:"Not provided" }}<br>
+                        Address: {{ profile.address|default:"Not provided" }}
+                    </p>
+                    <div class="btn-group">
+                        <a href="{% url 'authentication:profile_detail' profile.pk %}" class="btn btn-info">View</a>
+                        {% if request.user == profile.user or request.user.is_staff %}
+                        <a href="{% url 'authentication:profile_update' profile.pk %}" class="btn btn-warning">Edit</a>
+                        <a href="{% url 'authentication:profile_delete' profile.pk %}" class="btn btn-danger">Delete</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center">No profiles found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

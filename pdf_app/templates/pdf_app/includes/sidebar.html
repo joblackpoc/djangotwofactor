@@ -1,0 +1,45 @@
+<div class="sidebar">
+    <div class="sidebar-section categories">
+        <h3>Top Categories</h3>
+        <ul class="list-group">
+            {% for category in top_categories %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{{ category.get_absolute_url }}">{{ category.name }}</a>
+                    <span class="badge bg-primary rounded-pill">
+                        {{ category.pdfs.count }}
+                    </span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="sidebar-section recent-pdfs mt-4">
+        <h3>Recent PDFs</h3>
+        <div class="list-group">
+            {% for pdf in recent_pdfs %}
+                <a href="{{ pdf.get_absolute_url }}" class="list-group-item list-group-item-action">
+                    {{ pdf.title }}
+                    <small class="d-block text-muted">
+                        {{ pdf.created_at|date:"M d, Y" }}
+                    </small>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="sidebar-section stats mt-4">
+        <div class="card">
+            <div class="card-header">
+                Platform Stats
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Total PDFs
+                    <span class="badge bg-primary rounded-pill">
+                        {{ total_pdf_count }}
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

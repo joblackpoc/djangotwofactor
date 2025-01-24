@@ -1,0 +1,187 @@
+{% extends "main/base1.html" %}
+{% load static %}  
+
+
+{% block contact %}
+
+ <!-- Team Start -->
+ <div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">ผู้บริหาร</h6>
+            <h1 class="mb-5">สาธารณสุขอำเภอเมืองชุมพร</h1>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="team-item bg-light">
+                    <div class="overflow-hidden">
+                        <a href="{% url 'contact' %}"><img class="img-fluid" src="{% static 'img/sso.jpg' %}" alt=""></a>
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -23px;">
+                        <div class="bg-light d-flex justify-content-center pt-2 px-1">
+                            <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                            <!--<a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-instagram"></i></a>
+                            -->
+                        </div>
+                    </div>
+                    <div class="text-center p-4">
+                        <a href="{% url 'contact' %}"><h5 class="mb-0">นายสุทธิพงษ์ เหล่าศิริวุฒิ</h5></a>
+                        <a href="{% url 'contact' %}"><small>สาธารณสุขอำเภอเมืองชุมพร</small></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                <div class="team-item bg-light">
+                    <div class="overflow-hidden">
+                        <a href="{% url 'contact' %}"><img class="img-fluid" src="{% static 'img/sso.jpg' %}" alt=""></a>
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -23px;">
+                        <div class="bg-light d-flex justify-content-center pt-2 px-1">
+                            <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                            <!--<a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-instagram"></i></a>
+                            -->
+                        </div>
+                    </div>
+                    <div class="text-center p-4">
+                        <a href="{% url 'contact' %}"><h5 class="mb-0">นายชยานนท์ โชติมณี</h5></a>
+                        <a href="{% url 'contact' %}"><small>รองสาธารณสุขอำเภอเมืองชุมพร</small></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                <div class="team-item bg-light">
+                    <div class="overflow-hidden">
+                        <a href="{% url 'contact' %}"><img class="img-fluid" src="{% static 'img/sso.jpg' %}" alt=""></a>
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -23px;">
+                        <div class="bg-light d-flex justify-content-center pt-2 px-1">
+                            <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                            <!--<a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-instagram"></i></a>
+                            -->
+                        </div>
+                    </div>
+                    <div class="text-center p-4">
+                        <a href="{% url 'contact' %}"><h5 class="mb-0">นายสุภรณ์ นาคแท้</h5></a>
+                        <a href="{% url 'contact' %}"><small>รองสาธารณสุขอำเภอเมืองชุมพร</small></a>
+                    </div>
+                </div>
+            </div>
+            <!--<div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.7s">
+                <div class="team-item bg-light">
+                    <div class="overflow-hidden">
+                        <img class="img-fluid" src="{% static 'img/team-4.jpg' %}" alt="">
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -23px;">
+                        <div class="bg-light d-flex justify-content-center pt-2 px-1">
+                            <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="btn btn-sm-square btn-primary mx-1" href=""><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                    <div class="text-center p-4">
+                        <h5 class="mb-0">ผู้เชี่ยวชาญ</h5>
+                        <small>Designation</small>
+                    </div>
+                </div>
+            </div>
+        -->
+        </div>
+    </div>
+</div>
+
+<!-- Team End -->
+
+        <!-- Contact Start -->
+        <div class="container-xxl py-5">
+            <div class="container">
+                <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                    <h6 class="section-title bg-white text-center text-primary px-3">ติดต่อเรา</h6>
+                    <h1 class="mb-5">ข้อมูลการติดต่อเรา</h1>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <h5>สามารถติดต่อเราได้ที่</h5>
+                        <p class="mb-4">สำนักงานสาธารณสุขอำเภอเมืองชุมพร ตำบลท่ายาง อำเภอเมือง จังหวัดชุมพร 86000</p>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center justify-content-center flex-shrink-0 bg-primary" style="width: 50px; height: 50px;">
+                                <i class="fa fa-map-marker-alt text-white"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h5 class="text-primary">สำนักงาน</h5>
+                                <p class="mb-0">สำนักงานสาธารณสุขอำเภอเมืองชุมพร</p>
+                                <p class="mb-0">ตำบลท่ายาง อำเภอเมืองชุมพร จังหวัดชุมพร</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center justify-content-center flex-shrink-0 bg-primary" style="width: 50px; height: 50px;">
+                                <i class="fa fa-phone-alt text-white"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h5 class="text-primary">เบอร์โทร.</h5>
+                                <p class="mb-0">077 553 507</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center flex-shrink-0 bg-primary" style="width: 50px; height: 50px;">
+                                <i class="fa fa-envelope-open text-white"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h5 class="text-primary">อีเมล์</h5>
+                                <p class="mb-0">master@sasukcmpo.com</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <iframe class="position-relative rounded w-100 h-100"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3923.5860755035765!2d99.20866709124928!3d10.454383563054526!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3055ffb842c84f6f%3A0x5f935540f12c57a5!2z4Liq4Liz4LiZ4Lix4LiB4LiH4Liy4LiZ4Liq4Liy4LiY4Liy4Lij4LiT4Liq4Li44LiC4Lit4Liz4LmA4Lig4Lit4LmA4Lih4Li34Lit4LiH!5e0!3m2!1sth!2sth!4v1735806932575!5m2!1sth!2sth"
+                            frameborder="0" style="min-height: 300px; border:0;" allowfullscreen="" aria-hidden="false"
+                            tabindex="0"></iframe>
+                            
+                    </div>
+                   <!-- <div class="col-lg-4 col-md-12 wow fadeInUp" data-wow-delay="0.5s">
+                        <form>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="name" placeholder="Your Name">
+                                        <label for="name">Your Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="email" class="form-control" id="email" placeholder="Your Email">
+                                        <label for="email">Your Email</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="subject" placeholder="Subject">
+                                        <label for="subject">Subject</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" placeholder="Leave a message here" id="message" style="height: 150px"></textarea>
+                                        <label for="message">Message</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button class="btn btn-primary w-100 py-3" type="submit">Send Message</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                -->
+                </div>
+            </div>
+            <div class="text-center mt-5">
+                <a class="btn btn-primary py-3 px-5 mt-2" href="{% url 'index' %}">กลับสู่หน้าหลัก</a>
+            </div>
+        </div>
+        <!-- Contact End -->
+{% endblock contact %}
+    

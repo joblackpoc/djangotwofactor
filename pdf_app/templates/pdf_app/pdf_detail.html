@@ -1,0 +1,67 @@
+{% extends 'pdf_app/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<div class="row">
+    
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h2>{{ object.title }}</h2>
+            </div>
+            <div class="card-body">
+                <p>{{ object.description }}</p>
+                
+                <div class="mb-3">
+                    <strong>Category:</strong> {{ object.category.name }}
+                    <strong>Subcategory:</strong> {{ object.subcategory.name }}
+                </div>
+
+                <div class="mb-3">
+                    <h4>Share this PDF</h4>
+                    <div class="input-group">
+                        <input type="text" 
+                               class="form-control" 
+                               value="{{ share_url }}" 
+                               id="share-link" 
+                               readonly>
+                        <button class="btn btn-secondary" 
+                                onclick="copyToClipboard()">
+                            Copy Link
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <a href="{% url 'pdf_app:pdf_view' object.slug %}" 
+                       class="btn btn-primary">
+                        View PDF
+                    </a>
+                    {% if user == object.uploader %}
+                    <a href="{% url 'pdf_app:pdf_delete' object.slug %}" 
+                       class="btn btn-danger">
+                        Delete PDF
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                Uploaded by {{ object.uploader.username }} 
+                on {{ object.created_at|date:"M d, Y" }}
+                | Views: {{ object.views }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard() {
+    var copyText = document.getElementById("share-link");
+    copyText.select();
+    document.execCommand("copy");
+    alert("Copied the link: " + copyText.value);
+}
+</script>
+{% endblock %}
+

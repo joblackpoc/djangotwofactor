@@ -1,0 +1,207 @@
+<!-- templates/main/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blog Platform{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <style>
+        .like-button {
+            transition: transform 0.2s;
+        }
+        
+        .like-button:hover {
+            transform: scale(1.2);
+        }
+        
+        .like-button i {
+            font-size: 1.5rem;
+        }
+        
+        .like-button.liked i {
+            color: #dc3545;
+        }
+    </style>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'main:home' %}">Blog Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'main:home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'main:post_list' %}">Blog</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'main:post_create' %}">New Post</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <!-- Search Form -->
+                <form class="d-flex me-2" action="{% url 'main:post_search' %}" method="get">
+                    <input class="form-control me-2" type="search" name="query" placeholder="Search posts...">
+                    <button class="btn btn-outline-light" type="submit">Search</button>
+                </form>
+                <!-- User Menu -->
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'main:user_posts' user.username %}">My Posts</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item">Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mt-5 pt-4">
+        <!-- Messages -->
+        {% if messages %}
+            <div id="messages-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Single Content Block -->
+        {% block content %}
+        {% csrf_token %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>About</h5>
+                    <p>Share your thoughts and connect with others through our blog platform.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'main:home' %}" class="text-white">Home</a></li>
+                        <li><a href="{% url 'main:post_list' %}" class="text-white">Blog</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'accounts:profile' %}" class="text-white">Profile</a></li>
+                        {% else %}
+                            <li><a href="{% url 'accounts:login' %}" class="text-white">Login</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact</h5>
+                    <address class="text-white">
+                        <p><i class="bi bi-geo-alt"></i> 1771/1 Pattanakarn Road</p>
+                        <p><i class="bi bi-envelope"></i> info@blogplatform.com</p>
+                        <p><i class="bi bi-telephone"></i> (+66) 2763-2600</p>
+                    </address>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p class="mb-0">&copy; {% now "Y" %} Blog Platform. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+    <!-- Custom JS -->
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        // Auto-hide messages after 3 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 3000);
+        });
+    </script>
+    <script>
+        function likePost(slug) {
+            fetch(`/posts/${slug}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const likeIcon = document.getElementById('likeIcon');
+                    const likeCount = document.getElementById('likeCount');
+                    
+                    if (data.liked) {
+                        likeIcon.classList.remove('bi-heart');
+                        likeIcon.classList.add('bi-heart-fill', 'text-danger');
+                    } else {
+                        likeIcon.classList.remove('bi-heart-fill', 'text-danger');
+                        likeIcon.classList.add('bi-heart');
+                    }
+                    
+                    likeCount.textContent = data.like_count;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        // Make sure we have CSRF token
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            if (!csrftoken) {
+                console.error('CSRF token not found');
+            }
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+</html>

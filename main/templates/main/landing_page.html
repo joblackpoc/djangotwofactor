@@ -1,0 +1,431 @@
+<!-- templates/landing_page.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Platform</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <style>
+        /* Hero Section */
+        .carousel-item img {
+            height: 400px;
+            object-fit: cover;
+        }
+
+        /* Team Section */
+        .team-member img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        /* Post Cards */
+        .post-card {
+            transition: transform 0.3s;
+        }
+        .post-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Custom section padding */
+        section {
+            padding: 5rem 0;
+        }
+
+        /* Footer */
+        .footer-links {
+            list-style: none;
+            padding-left: 0;
+        }
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">BlogPlatform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#main-posts">Main Posts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#blog-posts">Blog Posts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#team">Team</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                </ul>
+
+                <div class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+                        <!--<a class="nav-link" href="{% url 'logout' %}">Logout</a>-->
+                        <li class="nav-item">
+                            <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn nav-link border-0 bg-transparent">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Carousel -->
+    <section id="home" class="mt-5">
+        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="https://picsum.photos/1920/400?random=1" class="d-block w-100" alt="Blog Platform">
+                    <div class="carousel-caption">
+                        <h1>Welcome to Blog Platform</h1>
+                        <p>Share your stories with the world</p>
+                        <a href="{% url 'register' %}" class="btn btn-primary">Get Started</a>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://picsum.photos/1920/400?random=2" class="d-block w-100" alt="Create Content">
+                    <div class="carousel-caption">
+                        <h1>Create Amazing Content</h1>
+                        <p>Use our powerful editor to bring your ideas to life</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://picsum.photos/1920/400?random=3" class="d-block w-100" alt="Community">
+                    <div class="carousel-caption">
+                        <h1>Join Our Community</h1>
+                        <p>Connect with other writers and readers</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Main Posts Section -->
+    <section id="main-posts" class="bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Featured Posts</h2>
+            <div class="row g-4">
+                {% for post in main_posts %}
+                <div class="col-md-4">
+                    <div class="card post-card h-100 shadow-sm">
+                        <img src="https://picsum.photos/400/200?random={{ forloop.counter }}" class="card-img-top" alt="{{ post.title }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="card-text text-muted">{{ post.content|truncatewords:20 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">By {{ post.author }}</small>
+                                <a href="{% url 'main_post_detail' post.slug %}" class="btn btn-outline-primary btn-sm">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Posts Section -->
+    <section id="blog-posts">
+        <div class="container">
+            <h2 class="text-center mb-5">Latest Blog Posts</h2>
+            <div class="row g-4">
+                {% for post in blog_posts %}
+                <div class="col-md-4">
+                    <div class="card post-card h-100 shadow-sm">
+                        <img src="https://picsum.photos/400/200?random={{ forloop.counter|add:3 }}" class="card-img-top" alt="{{ post.title }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="card-text text-muted">{{ post.content|truncatewords:20 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">By {{ post.author }}</small>
+                                <a href="{% url 'post_detail' post.slug %}" class="btn btn-outline-primary btn-sm">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+<!-- About Section -->
+<section id="about" class="bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="mb-4">About Our Platform</h2>
+                <p class="lead">Share your stories, connect with readers, and build your audience.</p>
+                <p>Our platform provides a space for writers to express themselves, share knowledge, and engage with a community of like-minded individuals. With powerful tools and a user-friendly interface, you can focus on what matters most - creating great content.</p>
+                <div class="row mt-4">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-check-circle-fill text-primary me-2"></i>
+                            <span>Rich Text Editor</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-check-circle-fill text-primary me-2"></i>
+                            <span>Comment System</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-check-circle-fill text-primary me-2"></i>
+                            <span>Social Sharing</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-check-circle-fill text-primary me-2"></i>
+                            <span>Analytics</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://picsum.photos/600/400?random=10" alt="About Us" class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section id="team">
+    <div class="container">
+        <h2 class="text-center mb-5">Our Team</h2>
+        <div class="row g-4">
+            <!-- Team Member 1 -->
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <img src="https://picsum.photos/150/150?random=1" class="rounded-circle mb-3 team-member" alt="Team Member">
+                        <h5 class="card-title">John Doe</h5>
+                        <p class="card-text text-muted">Founder & CEO</p>
+                        <div class="social-links">
+                            <a href="#" class="text-dark me-2"><i class="bi bi-twitter"></i></a>
+                            <a href="#" class="text-dark me-2"><i class="bi bi-linkedin"></i></a>
+                            <a href="#" class="text-dark"><i class="bi bi-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Team Member 2 -->
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <img src="https://picsum.photos/150/150?random=2" class="rounded-circle mb-3 team-member" alt="Team Member">
+                        <h5 class="card-title">Jane Smith</h5>
+                        <p class="card-text text-muted">Lead Developer</p>
+                        <div class="social-links">
+                            <a href="#" class="text-dark me-2"><i class="bi bi-twitter"></i></a>
+                            <a href="#" class="text-dark me-2"><i class="bi bi-linkedin"></i></a>
+                            <a href="#" class="text-dark"><i class="bi bi-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Team Member 3 -->
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <img src="https://picsum.photos/150/150?random=3" class="rounded-circle mb-3 team-member" alt="Team Member">
+                        <h5 class="card-title">Mike Johnson</h5>
+                        <p class="card-text text-muted">UX Designer</p>
+                        <div class="social-links">
+                            <a href="#" class="text-dark me-2"><i class="bi bi-twitter"></i></a>
+                            <a href="#" class="text-dark me-2"><i class="bi bi-linkedin"></i></a>
+                            <a href="#" class="text-dark"><i class="bi bi-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Team Member 4 -->
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <img src="https://picsum.photos/150/150?random=4" class="rounded-circle mb-3 team-member" alt="Team Member">
+                        <h5 class="card-title">Sarah Wilson</h5>
+                        <p class="card-text text-muted">Content Manager</p>
+                        <div class="social-links">
+                            <a href="#" class="text-dark me-2"><i class="bi bi-twitter"></i></a>
+                            <a href="#" class="text-dark me-2"><i class="bi bi-linkedin"></i></a>
+                            <a href="#" class="text-dark"><i class="bi bi-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Contact Us</h2>
+        <div class="row">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <form>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+            <div class="col-lg-6">
+                <div class="map-container rounded overflow-hidden">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3875.6464274853094!2d100.56324143437062!3d13.745037259977671!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e29ee109dab6e1%3A0xfd15aa1c632d9677!2sThai-Nichi%20Institute%20of%20Technology!5e0!3m2!1sen!2sth!4v1704727432330!5m2!1sen!2sth"
+                        width="100%" 
+                        height="450" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-5">
+    <div class="container">
+        <div class="row">
+            <!-- About Column -->
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <h5>About BlogPlatform</h5>
+                <p class="text-muted">A platform for writers and readers to share stories, ideas, and connect with each other.</p>
+                <div class="social-links mt-3">
+                    <a href="#" class="text-white me-2"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-white me-2"><i class="bi bi-twitter"></i></a>
+                    <a href="#" class="text-white me-2"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-white"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+            <!-- Quick Links -->
+            <div class="col-lg-2 mb-4 mb-lg-0">
+                <h5>Quick Links</h5>
+                <ul class="footer-links">
+                    <li><a href="#home" class="text-muted text-decoration-none">Home</a></li>
+                    <li><a href="#about" class="text-muted text-decoration-none">About</a></li>
+                    <li><a href="#team" class="text-muted text-decoration-none">Team</a></li>
+                    <li><a href="#contact" class="text-muted text-decoration-none">Contact</a></li>
+                </ul>
+            </div>
+            <!-- Contact Info -->
+            <div class="col-lg-3 mb-4 mb-lg-0">
+                <h5>Contact Info</h5>
+                <ul class="footer-links">
+                    <li class="text-muted"><i class="bi bi-geo-alt me-2"></i>1771/1 Pattanakarn Road, Bangkok 10250</li>
+                    <li class="text-muted"><i class="bi bi-telephone me-2"></i>(+66) 2763-2600</li>
+                    <li class="text-muted"><i class="bi bi-envelope me-2"></i>info@blogplatform.com</li>
+                </ul>
+            </div>
+            <!-- Newsletter -->
+            <div class="col-lg-3">
+                <h5>Newsletter</h5>
+                <p class="text-muted">Subscribe to our newsletter for updates.</p>
+                <form class="mt-3">
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="Enter your email">
+                        <button class="btn btn-primary" type="submit">Subscribe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Copyright -->
+        <div class="text-center mt-4 pt-4 border-top border-secondary">
+            <p class="mb-0 text-muted">&copy; {% now "Y" %} BlogPlatform. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JS -->
+<script>
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // Active nav link on scroll
+    window.addEventListener('scroll', function() {
+        let sections = document.querySelectorAll('section');
+        let navLinks = document.querySelectorAll('.navbar-nav a');
+        
+        sections.forEach(section => {
+            let top = window.scrollY;
+            let offset = section.offsetTop - 150;
+            let height = section.offsetHeight;
+            let id = section.getAttribute('id');
+            
+            if (top >= offset && top < offset + height) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>
