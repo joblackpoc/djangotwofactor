@@ -1,0 +1,31 @@
+# New design
+## ยกเลิก media
+## ยกเลิก staticfiles
+## ยกเลิก virtualenv
+## ยกเลิก database
+*charset-normalizer
+*crispy-bootstrap5
+*cryptography
+*Django
+*django-allauth
+*django-axes
+*django-ckeditor
+*django-cleanup
+*django-crispy-forms
+*django-filter
+*django-otp
+*django-phonenumbers
+*django-recaptcha
+*django-storages
+*django-tinymce
+*django_csp
+*gunicorn
+*pdf2image
+*phonenumbers
+*pillow
+*PyJWT
+*python-dotenv
+*python-magic
+*qrcode
+*requests
+*whitenoise2
