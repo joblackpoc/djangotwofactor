@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Documents List{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Documents</h2>
+    </div>
+    <div class="col text-end">
+        <a href="{% url 'pdf_app:document_create' %}" class="btn btn-primary">Create New Document</a>
+    </div>
+</div>
+
+<!-- Search Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                {{ search_form.search_query }}
+                <div class="form-text">Search by title or description</div>
+            </div>
+            <div class="col-md-3">
+                {{ search_form.date_from }}
+                <div class="form-text">Date from</div>
+            </div>
+            <div class="col-md-3">
+                {{ search_form.date_to }}
+                <div class="form-text">Date to</div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Documents List -->
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Office</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Created By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for document in documents %}
+            <tr>
+                <td>{{ document.title }}</td>
+                <td>{{ document.office_name }}</td>
+                <td>{{ document.date }}</td>
+                <td>
+                    <span class="badge {% if document.status == 'accepted' %}bg-success{% elif document.status == 'rejected' %}bg-danger{% else %}bg-warning{% endif %}">
+                        {{ document.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ document.created_by.username }}</td>
+                <td>
+                    <a href="{% url 'pdf_app:document_detail' document.pk %}" class="btn btn-sm btn-info">View</a>
+                    {% if document.created_by == user and document.status != 'accepted' %}
+                        <a href="{% url 'pdf_app:document_update' document.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No documents found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1">&laquo; First</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,92 @@
+/* General Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Form Styles */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Document Preview Styles */
+.preview-container {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.document-header {
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 1rem;
+}
+
+.document-body {
+    padding: 1rem 0;
+}
+
+.document-footer {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+}
+
+/* Status Badge Styles */
+.badge {
+    font-size: 0.875rem;
+    padding: 0.5em 0.75em;
+}
+
+/* Table Styles */
+.table th {
+    background-color: #f8f9fa;
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .footer,
+    .btn,
+    .no-print {
+        display: none !important;
+    }
+    
+    .preview-container {
+        margin: 0;
+        padding: 0;
+        border: none;
+        box-shadow: none;
+    }
+    
+    body {
+        padding: 0;
+        margin: 0;
+    }
+    
+    @page {
+        margin: 2cm;
+    }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .preview-container {
+        padding: 10px;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ document.title }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2.5cm;
+            @top-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 9pt;
+            }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2cm;
+        }
+        
+        .title {
+            font-size: 18pt;
+            font-weight: bold;
+            margin-bottom: 0.5cm;
+        }
+        
+        .office {
+            font-size: 14pt;
+            margin-bottom: 0.3cm;
+        }
+        
+        .date {
+            font-size: 11pt;
+            margin-bottom: 1cm;
+        }
+        
+        .receiver {
+            margin-bottom: 1cm;
+        }
+        
+        .section {
+            margin-bottom: 1cm;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 0.3cm;
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            border-top: 1px solid #000;
+            padding-top: 0.5cm;
+            font-size: 9pt;
+        }
+        
+        .signatures {
+            margin-top: 2cm;
+            page-break-inside: avoid;
+        }
+        
+        .signature-block {
+            display: inline-block;
+            width: 45%;
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #000;
+            margin-top: 1.5cm;
+            padding-top: 0.2cm;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">{{ document.title }}</div>
+        <div class="office">{{ document.office_name }}</div>
+        <div class="date">{{ document.date|date:"F d, Y" }}</div>
+    </div>
+
+    <div class="receiver">
+        <strong>To:</strong> {{ document.receiver }}
+    </div>
+
+    <div class="section">
+        <div class="section-title">Description</div>
+        {{ document.description|linebreaks }}
+    </div>
+
+    <div class="section">
+        <div class="section-title">Summary</div>
+        {{ document.summary|linebreaks }}
+    </div>
+
+    <div class="section">
+        <div class="section-title">Object</div>
+        {{ document.object|linebreaks }}
+    </div>
+
+    <div class="signatures">
+        <div class="signature-block">
+            <div class="signature-line">
+                {{ document.created_by.get_full_name|default:document.created_by.username }}
+            </div>
+            <div>Created By</div>
+        </div>
+        
+        {% if document.accepted_by %}
+        <div class="signature-block" style="float: right;">
+            <div class="signature-line">
+                {{ document.accepted_by.get_full_name|default:document.accepted_by.username }}
+            </div>
+            <div>Approved By</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        Generated on {{ generated_date|date:"F d, Y H:i" }}
+    </div>
+</body>
+</html>

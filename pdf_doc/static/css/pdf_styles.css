@@ -1,0 +1,145 @@
+@page {
+    margin: 2.5cm;
+    @top-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 10pt;
+    }
+    @bottom-center {
+        content: "Generated: " string(current-date);
+        font-size: 9pt;
+    }
+}
+
+/* Basic Typography */
+body {
+    font-family: Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #000;
+}
+
+/* Document Header */
+.document-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.document-title {
+    font-size: 24pt;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.office-name {
+    font-size: 16pt;
+    margin-bottom: 5px;
+}
+
+.document-date {
+    font-size: 12pt;
+}
+
+/* Document Sections */
+.section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-weight: bold;
+    font-size: 14pt;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 5px;
+}
+
+.section-content {
+    text-align: justify;
+}
+
+/* Receiver Information */
+.receiver-info {
+    margin: 20px 0;
+}
+
+/* Main Content */
+.description, .summary, .object {
+    margin-bottom: 20px;
+}
+
+/* Signature Section */
+.signature-section {
+    margin-top: 50px;
+    page-break-inside: avoid;
+}
+
+.signature-block {
+    display: inline-block;
+    width: 45%;
+    margin: 0 2.5%;
+}
+
+.signature-line {
+    border-top: 1px solid #000;
+    margin-top: 40px;
+    padding-top: 5px;
+    text-align: center;
+}
+
+.signature-name {
+    font-weight: bold;
+}
+
+.signature-title {
+    font-size: 10pt;
+    color: #333;
+}
+
+/* Status Indicators */
+.status-accepted {
+    color: #28a745;
+}
+
+.status-rejected {
+    color: #dc3545;
+}
+
+.status-pending {
+    color: #ffc107;
+}
+
+/* Footer */
+.footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 9pt;
+    color: #666;
+}
+
+/* Review Comments */
+.review-comments {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #f8f9fa;
+}
+
+/* Print-specific styles */
+@media print {
+    .no-print {
+        display: none;
+    }
+    
+    body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .page-break {
+        page-break-before: always;
+    }
+    
+    .avoid-break {
+        page-break-inside: avoid;
+    }
+}

@@ -1,0 +1,37 @@
+<div class="row stats-container">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total Documents</h5>
+                <p class="card-text display-4">{{ stats.total }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Pending</h5>
+                <p class="card-text display-4 text-warning">{{ stats.pending }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Accepted</h5>
+                <p class="card-text display-4 text-success">{{ stats.accepted }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Rejected</h5>
+                <p class="card-text display-4 text-danger">{{ stats.rejected }}</p>
+            </div>
+        </div>
+    </div>
+</div>

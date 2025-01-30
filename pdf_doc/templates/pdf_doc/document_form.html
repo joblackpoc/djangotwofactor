@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if is_update %}Edit Document{% else %}Create New Document{% endif %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .error-feedback {
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>{% if is_update %}Edit Document{% else %}Create New Document{% endif %}</h2>
+    </div>
+    <div class="col text-end">
+        <a href="{% url 'pdf_app:document_list' %}" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" id="documentForm" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="row">
+                <!-- Title Field -->
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="error-feedback">
+                            {% for error in form.title.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Office Name Field -->
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.office_name.id_for_label }}" class="form-label">Office Name</label>
+                    {{ form.office_name }}
+                    {% if form.office_name.errors %}
+                        <div class="error-feedback">
+                            {% for error in form.office_name.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Date Field -->
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.date.id_for_label }}" class="form-label">Date</label>
+                    {{ form.date }}
+                    {% if form.date.errors %}
+                        <div class="error-feedback">
+                            {% for error in form.date.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Receiver Field -->
+                <div class="col-md-6 form-group">
+                    <label for="{{ form.receiver.id_for_label }}" class="form-label">Receiver</label>
+                    {{ form.receiver }}
+                    {% if form.receiver.errors %}
+                        <div class="error-feedback">
+                            {% for error in form.receiver.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Description Field -->
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="error-feedback">
+                        {% for error in form.description.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Summary Field -->
+            <div class="form-group">
+                <label for="{{ form.summary.id_for_label }}" class="form-label">Summary</label>
+                {{ form.summary }}
+                {% if form.summary.errors %}
+                    <div class="error-feedback">
+                        {% for error in form.summary.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Object Field -->
+            <div class="form-group">
+                <label for="{{ form.object.id_for_label }}" class="form-label">Object</label>
+                {{ form.object }}
+                {% if form.object.errors %}
+                    <div class="error-feedback">
+                        {% for error in form.object.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">
+                    {% if is_update %}Update Document{% else %}Create Document{% endif %}
+                </button>
+                <a href="{% url 'pdf_app:document_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_javascript %}
+<script>
+// Form validation
+document.getElementById('documentForm').addEventListener('submit', function(event) {
+    let isValid = true;
+    const requiredFields = this.querySelectorAll('input[required], textarea[required]');
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            isValid = false;
+            field.classList.add('is-invalid');
+            
+            // Create or update error message
+            let errorDiv = field.nextElementSibling;
+            if (!errorDiv || !errorDiv.classList.contains('error-feedback')) {
+                errorDiv = document.createElement('div');
+                errorDiv.classList.add('error-feedback');
+                field.parentNode.insertBefore(errorDiv, field.nextSibling);
+            }
+            errorDiv.textContent = 'This field is required.';
+        } else {
+            field.classList.remove('is-invalid');
+            const errorDiv = field.nextElementSibling;
+            if (errorDiv && errorDiv.classList.contains('error-feedback')) {
+                errorDiv.textContent = '';
+            }
+        }
+    });
+
+    if (!isValid) {
+        event.preventDefault();
+    }
+});
+</script>
+{% endblock %}

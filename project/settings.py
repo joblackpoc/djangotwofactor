@@ -12,17 +12,29 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# SECURITY WARNING: keep the secret key used in production secret!
+def get_env_value(env_variable):
+    try:
+        return os.environ[env_variable]
+    except KeyError:
+        error_msg = f'Set the {env_variable} environment variable'
+        raise ImproperlyConfigured(error_msg)
 
 load_dotenv(BASE_DIR / '.env')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = str(os.getenv('SECRET_KEY'))
+#SECRET_KEY = str(os.getenv('SECRET_KEY'))
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = get_env_value('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -44,8 +56,9 @@ if not DEBUG:
 #SECURE_BROWSER_XSS_FILTER = True  # XSS protection
 #SECURE_CONTENT_TYPE_NOSNIFF = True  # Content type nosniff
 
-ALLOWED_HOSTS = ['127.0.0.1']
+#ALLOWED_HOSTS = ['127.0.0.1']
 
+ALLOWED_HOSTS = get_env_value('ALLOWED_HOSTS').split(',')
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -60,9 +73,13 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'django_ckeditor_5',
     'django.contrib.sites',
+    
+    'django_extensions',
+    'django.contrib.humanize'
     #'accounts.apps.AccountsConfig',
     'authentication.apps.AuthenticationConfig',
     'main.apps.MainConfig',
+    'pdf_doc.apps.PdfDocConfig',
     'pdf_app',
 ]
 
@@ -82,6 +99,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'authentication.middleware.SessionTimeoutMiddleware',
+    # Security Middleware
+    'django.middleware.security.SecurityMiddleware',
+    # HTTP Strict Transport Security
+    'django.middleware.security.StrictTransportSecurityMiddleware',
 ]
 
 
@@ -100,6 +121,9 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 
             ],
+            'libraries': {
+                'pdf_tags': 'pdf_doc.templatetags.pdf_tags',
+            }
         },
     },
 ]
@@ -113,6 +137,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+        'CONN_MAX_AGE': 60,
     }
 }
 
@@ -134,17 +162,42 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+#SECURE_SSL_REDIRECT = True  # Only in production
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
 
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Session Settings
+SESSION_COOKIE_AGE = 300  # 5 minutes in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_SECURE = True  # Use only with HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_SAMESITE = 'Strict'
+
+# CSRF Settings
+#CSRF_COOKIE_SECURE = True    # Use only with HTTPS
+CSRF_COOKIE_SECURE = False  # Only during development
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Strict'
+CSRF_TRUSTED_ORIGINS = get_env_value('CSRF_TRUSTED_ORIGINS').split(',')
+
+AUTH_USER_MODEL = 'authentication.CustomUser'
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'Asia/Bangkok'
-
+USE_L10N = True
 USE_I18N = True
-
 USE_TZ = True
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -152,6 +205,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles/'
 STATICFILES_DIR = [
     BASE_DIR / 'static',
+]
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
 MEDIA_URL = 'media/'
@@ -161,28 +218,117 @@ LOGIN_URL = 'authentication:login'
 LOGIN_REDIRECT_URL = 'authentication:profile_detail'
 #LOGOUT_REDIRECT_URL = 'accounts:login'
 
-AUTH_USER_MODEL = 'authentication.CustomUser'
-
-
-# Session Settings
-SESSION_COOKIE_AGE = 300  # 5 minutes in seconds
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_SECURE = True  # Use only with HTTPS
-#CSRF_COOKIE_SECURE = True    # Use only with HTTPS
-CSRF_COOKIE_SECURE = False  # Only during development
-#SECURE_SSL_REDIRECT = True  # Only in production
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
-
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_PORT = os.getenv('EMAIL_PORT')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = get_env_value('DEFAULT_FROM_EMAIL')
 
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'django.log',
+            'formatter': 'verbose',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file', 'mail_admins'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.security': {
+            'handlers': ['file', 'mail_admins'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        'pdf_doc': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        },
+    },
+}
+
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': get_env_value('REDIS_URL'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'PARSER_CLASS': 'redis.connection._HiredisParser',
+            'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
+            'CONNECTION_POOL_CLASS_KWARGS': {
+                'max_connections': 50,
+                'timeout': 20,
+            }
+        }
+    }
+}
+
+# Security Headers
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+# File Upload Settings
+#FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440  # 2.5 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5 MB
+FILE_UPLOAD_PERMISSIONS = 0o644
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
+FILE_UPLOAD_HANDLERS = [
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]
+
+# Custom Settings for PDF App
+PDF_UPLOAD_PATH = 'pdfs/'
+PDF_FILE_SIZE_LIMIT = 5242880  # 5 MB
+
+# Development Settings
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+    INTERNAL_IPS = ['127.0.0.1']
+    
+    # Disable certain security settings in development
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 # CKEditor configuration
 CKEDITOR_5_CONFIGS = {
     'default': {
