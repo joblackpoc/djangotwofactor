@@ -1,32 +1,50 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, permission_required
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, DetailView
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.db.models import Q
-from django.utils import timezone
-from django.http import HttpResponseForbidden
-from .models import PDFDocument
-from .forms import PDFDocumentForm, DocumentReviewForm, DocumentSearchForm
-import datetime
+from .models import Document
+from .forms import DocumentForm, DocumentAcceptForm, DocumentSearchForm
+from .utils import generate_pdf
+
+class DocumentCreateView(LoginRequiredMixin, CreateView):
+    model = Document
+    form_class = DocumentForm
+    template_name = 'document_manager/document_form.html'
+    success_url = reverse_lazy('document_list')
+
+    def form_valid(self, form):
+        form.instance.post_by = self.request.user
+        return super().form_valid(form)
+
+class DocumentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Document
+    form_class = DocumentForm
+    template_name = 'document_manager/document_form.html'
+    success_url = reverse_lazy('document_list')
+
+    def test_func(self):
+        obj = self.get_object()
+        return obj.post_by == self.request.user and not obj.is_accepted
 
 class DocumentListView(LoginRequiredMixin, ListView):
-    model = PDFDocument
-    template_name = 'pdf_app/document_list.html'
+    model = Document
+    template_name = 'document_manager/document_list.html'
     context_object_name = 'documents'
     paginate_by = 10
 
     def get_queryset(self):
-        queryset = PDFDocument.objects.all()
-        if not self.request.user.has_perm('pdf_app.can_view_all_documents'):
-            queryset = queryset.filter(created_by=self.request.user)
+        queryset = Document.objects.all()
+        if not self.request.user.has_perm('document_manager.can_view_all_documents'):
+            queryset = queryset.filter(post_by=self.request.user)
 
         form = DocumentSearchForm(self.request.GET)
         if form.is_valid():
             search_query = form.cleaned_data.get('search_query')
             date_from = form.cleaned_data.get('date_from')
             date_to = form.cleaned_data.get('date_to')
+            status = form.cleaned_data.get('status')
 
             if search_query:
                 queryset = queryset.filter(
@@ -37,93 +55,61 @@ class DocumentListView(LoginRequiredMixin, ListView):
                 queryset = queryset.filter(date__gte=date_from)
             if date_to:
                 queryset = queryset.filter(date__lte=date_to)
+            if status == 'accepted':
+                queryset = queryset.filter(is_accepted=True)
+            elif status == 'pending':
+                queryset = queryset.filter(is_accepted=False)
 
-        return queryset.select_related('created_by', 'accepted_by')
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_form'] = DocumentSearchForm(self.request.GET)
         return context
 
-@login_required
-def document_create(request):
-    if request.method == 'POST':
-        form = PDFDocumentForm(request.POST)
-        if form.is_valid():
-            document = form.save(commit=False)
-            document.created_by = request.user
-            document.save()
-            messages.success(request, 'Document created successfully.')
-            return redirect('document_detail', pk=document.pk)
-    else:
-        form = PDFDocumentForm()
-    
-    return render(request, 'pdf_app/document_form.html', {'form': form})
-
-class DocumentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    model = PDFDocument
-    template_name = 'pdf_app/document_detail.html'
-    context_object_name = 'document'
+class StaffDocumentListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Document
+    template_name = 'document_manager/staff_document_list.html'
+    context_object_name = 'documents'
+    paginate_by = 10
 
     def test_func(self):
-        document = self.get_object()
-        return (document.created_by == self.request.user or 
-                self.request.user.has_perm('pdf_app.can_view_all_documents'))
+        return self.request.user.has_perm('document_manager.can_accept_document')
+
+class DocumentPreviewView(LoginRequiredMixin, DetailView):
+    model = Document
+    template_name = 'document_manager/document_preview.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['can_review'] = self.request.user.has_perm('pdf_app.can_accept_documents')
-        context['can_print'] = (self.object.status == 'accepted' or 
-                              self.request.user.has_perm('pdf_app.can_accept_documents'))
-        if context['can_review']:
-            context['review_form'] = DocumentReviewForm(instance=self.object)
+        context['can_print'] = (
+            self.object.is_accepted or 
+            self.request.user.has_perm('document_manager.can_accept_document')
+        )
         return context
-
-@login_required
-@permission_required('pdf_app.can_accept_documents')
-def document_review(request, pk):
-    document = get_object_or_404(PDFDocument, pk=pk)
     
-    if request.method == 'POST':
-        form = DocumentReviewForm(request.POST, instance=document)
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.accepted_by = request.user
-            review.updated_datetime = timezone.now()
-            review.save()
-            messages.success(request, 'Document reviewed successfully.')
-            return redirect('document_detail', pk=pk)
-    else:
-        return HttpResponseForbidden()
+from django.http import HttpResponse
+from .utils import generate_pdf
 
-    return render(request, 'pdf_app/document_review.html', {
-        'form': form,
-        'document': document
-    })
-
-@login_required
-def document_update(request, pk):
-    document = get_object_or_404(PDFDocument, pk=pk)
-    
-    if document.created_by != request.user:
-        return HttpResponseForbidden()
+def download_pdf(request, pk):
+    try:
+        document = get_object_or_404(Document, pk=pk)
         
-    if document.status == 'accepted':
-        messages.error(request, 'Cannot update an accepted document.')
-        return redirect('document_detail', pk=pk)
+        # Check if user has permission to download
+        if not (document.is_accepted or 
+                document.post_by == request.user or 
+                request.user.has_perm('document_manager.can_accept_document')):
+            messages.error(request, "You don't have permission to download this document.")
+            return redirect('document_list')
         
-    if request.method == 'POST':
-        form = PDFDocumentForm(request.POST, instance=document)
-        if form.is_valid():
-            document = form.save(commit=False)
-            document.status = 'pending'
-            document.save()
-            messages.success(request, 'Document updated successfully.')
-            return redirect('document_detail', pk=pk)
-    else:
-        form = PDFDocumentForm(instance=document)
-    
-    return render(request, 'pdf_app/document_form.html', {
-        'form': form,
-        'is_update': True
-    })
+        # Generate PDF
+        pdf = generate_pdf(document)
+        
+        # Create the HttpResponse object with PDF headers
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{document.title}.pdf"'
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error generating PDF: {str(e)}")
+        return redirect('document_list')

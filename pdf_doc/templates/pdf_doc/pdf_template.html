@@ -1,89 +1,84 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>{{ document.title }}</title>
-    <style>
+    <style type="text/css">
         @page {
-            size: A4;
-            margin: 2.5cm;
-            @top-right {
-                content: "Page " counter(page) " of " counter(pages);
-                font-size: 9pt;
+            size: a4 portrait;
+            margin: 2cm;
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 1cm;
+                margin-left: 2cm;
+                margin-right: 2cm;
+                height: 1cm;
             }
         }
-        
         body {
-            font-family: Arial, sans-serif;
-            font-size: 11pt;
-            line-height: 1.6;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12pt;
+            color: #000000;
         }
-        
         .header {
             text-align: center;
-            margin-bottom: 2cm;
+            margin-bottom: 30px;
         }
-        
         .title {
-            font-size: 18pt;
+            font-size: 24pt;
             font-weight: bold;
-            margin-bottom: 0.5cm;
+            margin-bottom: 10px;
         }
-        
-        .office {
-            font-size: 14pt;
-            margin-bottom: 0.3cm;
+        .office-name {
+            font-size: 16pt;
+            margin-bottom: 5px;
         }
-        
         .date {
-            font-size: 11pt;
-            margin-bottom: 1cm;
+            font-size: 12pt;
+            margin-bottom: 20px;
         }
-        
-        .receiver {
-            margin-bottom: 1cm;
-        }
-        
         .section {
-            margin-bottom: 1cm;
+            margin: 20px 0;
         }
-        
         .section-title {
             font-weight: bold;
-            margin-bottom: 0.3cm;
+            font-size: 14pt;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
         }
-        
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            border-top: 1px solid #000;
-            padding-top: 0.5cm;
-            font-size: 9pt;
-        }
-        
-        .signatures {
-            margin-top: 2cm;
+        .signature-section {
+            margin-top: 50px;
             page-break-inside: avoid;
         }
-        
-        .signature-block {
-            display: inline-block;
-            width: 45%;
-            text-align: center;
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        
+        .signature-table td {
+            width: 50%;
+            text-align: center;
+            padding: 10px;
+        }
         .signature-line {
             border-top: 1px solid #000;
-            margin-top: 1.5cm;
-            padding-top: 0.2cm;
+            margin-top: 40px;
+            padding-top: 5px;
         }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 10pt;
+        }
+        .status-pending { background-color: #ffc107; }
+        .status-accepted { background-color: #28a745; color: white; }
+        .status-rejected { background-color: #dc3545; color: white; }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="title">{{ document.title }}</div>
-        <div class="office">{{ document.office_name }}</div>
+        <div class="office-name">{{ document.office_name }}</div>
         <div class="date">{{ document.date|date:"F d, Y" }}</div>
     </div>
 
@@ -93,39 +88,47 @@
 
     <div class="section">
         <div class="section-title">Description</div>
-        {{ document.description|linebreaks }}
+        <div>{{ document.description|linebreaks }}</div>
     </div>
 
     <div class="section">
         <div class="section-title">Summary</div>
-        {{ document.summary|linebreaks }}
+        <div>{{ document.summary|linebreaks }}</div>
     </div>
 
     <div class="section">
         <div class="section-title">Object</div>
-        {{ document.object|linebreaks }}
+        <div>{{ document.object|linebreaks }}</div>
     </div>
 
-    <div class="signatures">
-        <div class="signature-block">
-            <div class="signature-line">
-                {{ document.created_by.get_full_name|default:document.created_by.username }}
-            </div>
-            <div>Created By</div>
-        </div>
-        
-        {% if document.accepted_by %}
-        <div class="signature-block" style="float: right;">
-            <div class="signature-line">
-                {{ document.accepted_by.get_full_name|default:document.accepted_by.username }}
-            </div>
-            <div>Approved By</div>
-        </div>
-        {% endif %}
+    <div class="signature-section">
+        <table class="signature-table">
+            <tr>
+                <td>
+                    <div class="signature-line">
+                        {{ document.created_by.get_full_name|default:document.created_by.username }}
+                    </div>
+                    <div>Created By</div>
+                </td>
+                {% if document.accepted_by %}
+                <td>
+                    <div class="signature-line">
+                        {{ document.accepted_by.get_full_name|default:document.accepted_by.username }}
+                    </div>
+                    <div>Approved By</div>
+                </td>
+                {% endif %}
+            </tr>
+        </table>
     </div>
 
-    <div class="footer">
-        Generated on {{ generated_date|date:"F d, Y H:i" }}
+    <div id="footerContent">
+        <table width="100%">
+            <tr>
+                <td>Generated on: {{ generated_date|date:"F d, Y H:i" }}</td>
+                <td style="text-align: right;">Page <pdf:pagenumber> of <pdf:pagecount></td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>

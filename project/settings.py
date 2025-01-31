@@ -103,6 +103,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     # HTTP Strict Transport Security
     'django.middleware.security.StrictTransportSecurityMiddleware',
+    'csp.middleware.CSPMiddleware',
 ]
 
 

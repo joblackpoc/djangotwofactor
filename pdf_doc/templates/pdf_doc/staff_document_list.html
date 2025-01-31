@@ -1,0 +1,174 @@
+{% extends 'document_manager/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Staff Document Review{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Document Review Queue</h2>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            {{ search_form|crispy }}
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a href="{% url 'staff_document_list' %}" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<form id="batch-accept-form" method="post">
+    {% csrf_token %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="select-all" class="form-check-input">
+                    </th>
+                    <th>Title</th>
+                    <th>Submitted By</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for document in documents %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="document_ids" value="{{ document.id }}" 
+                               class="form-check-input document-check" 
+                               {% if document.is_accepted %}disabled{% endif %}>
+                    </td>
+                    <td>{{ document.title }}</td>
+                    <td>{{ document.post_by.get_full_name|default:document.post_by.username }}</td>
+                    <td>{{ document.date }}</td>
+                    <td>
+                        {% if document.is_accepted %}
+                        <span class="badge bg-success">Accepted</span>
+                        {% else %}
+                        <span class="badge bg-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'document_preview' document.pk %}" class="btn btn-sm btn-info">Preview</a>
+                        {% if not document.is_accepted %}
+                        <button type="button" class="btn btn-sm btn-primary review-btn" 
+                                data-document-id="{{ document.pk }}"
+                                data-bs-toggle="modal" data-bs-target="#reviewModal">
+                            Review
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No documents found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-3">
+        <button type="button" id="batch-accept" class="btn btn-success" disabled>
+            Accept Selected
+        </button>
+    </div>
+</form>
+
+<!-- Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Review Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="review-form" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="document_id" id="document_id">
+                    <div class="mb-3">
+                        <label class="form-label">Decision</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="is_accepted" 
+                                       id="accept" value="true" required>
+                                <label class="form-check-label" for="accept">Accept</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="is_accepted" 
+                                       id="reject" value="false">
+                                <label class="form-check-label" for="reject">Reject</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="result" class="form-label">Comments/Reason</label>
+                        <textarea class="form-control" id="result" name="result" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('select-all');
+    const documentChecks = document.querySelectorAll('.document-check');
+    const batchAcceptBtn = document.getElementById('batch-accept');
+    const reviewModal = document.getElementById('reviewModal');
+    const reviewForm = document.getElementById('review-form');
+
+    // Select all functionality
+    selectAll.addEventListener('change', function() {
+        documentChecks.forEach(check => {
+            if (!check.disabled) {
+                check.checked = this.checked;
+            }
+        });
+        updateBatchButton();
+    });
+
+    // Update batch button state
+    documentChecks.forEach(check => {
+        check.addEventListener('change', updateBatchButton);
+    });
+
+    function updateBatchButton() {
+        const checkedCount = document.querySelectorAll('.document-check:checked').length;
+        batchAcceptBtn.disabled = checkedCount === 0;
+    }
+
+    // Handle review button clicks
+    document.querySelectorAll('.review-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('document_id').value = this.dataset.documentId;
+        });
+    });
+
+    // Form validation
+    reviewForm.addEventListener('submit', function(e) {
+        if (!this.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        this.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}
