@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Document Details{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Document Details</h2>
+            <div class="btn-group">
+                {% if can_print %}
+                <a href="{% url 'core:document_pdf' document.pk %}" class="btn btn-success" target="_blank">
+                    <i class="fas fa-file-pdf"></i> View PDF
+                </a>
+                {% endif %}
+                {% if user.is_staff or document.status != 'accepted' and document.post_by == user %}
+                <a href="{% url 'core:document_update' document.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                {% endif %}
+                <a href="{% url 'core:document_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Document Information</h3>
+                <table class="table">
+                    <tr>
+                        <th width="30%">Title:</th>
+                        <td>{{ document.title }}</td>
+                    </tr>
+                    <tr>
+                        <th>Office:</th>
+                        <td>{{ document.office_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date:</th>
+                        <td>{{ document.date }}</td>
+                    </tr>
+                    <tr>
+                        <th>Receiver:</th>
+                        <td>{{ document.receiver }}</td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td>
+                            <span class="badge bg-{{ document.status|yesno:'success,warning,danger' }}">
+                                {{ document.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Created By:</th>
+                        <td>{{ document.post_by.get_full_name|default:document.post_by.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Created Date:</th>
+                        <td>{{ document.created_datetime }}</td>
+                    </tr>
+                    {% if document.accept_by %}
+                    <tr>
+                        <th>Approved By:</th>
+                        <td>{{ document.accept_by.get_full_name|default:document.accept_by.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Approved Date:</th>
+                        <td>{{ document.updated_datetime }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h3>Content</h3>
+                <div class="mb-3">
+                    <h5>Description</h5>
+                    <p>{{ document.description|linebreaks }}</p>
+                </div>
+                <div class="mb-3">
+                    <h5>Summary</h5>
+                    <p>{{ document.summary|linebreaks }}</p>
+                </div>
+                <div class="mb-3">
+                    <h5>Object</h5>
+                    <div>{{ document.object|safe }}</div>
+                </div>
+                {% if document.result %}
+                <div class="mb-3">
+                    <h5>Result/Comments</h5>
+                    <p>{{ document.result|linebreaks }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if user.is_staff and not document.accept_by %}
+        <div class="mt-4">
+            <h3>Approval Form</h3>
+            <form method="post" action="{% url 'core:document_approve' document.pk %}" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="status" class="form-label">Status</label>
+                        <select name="status" id="status" class="form-select" required>
+                            <option value="">Select Status</option>
+                            <option value="accepted">Accept</option>
+                            <option value="rejected">Reject</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="result" class="form-label">Result/Comments</label>
+                        <textarea name="result" id="result" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Submit Decision</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+{% endblock %}

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ document.title }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2cm;
+            border-bottom: 2px solid #333;
+            padding-bottom: 1cm;
+        }
+        .document-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 0.5cm;
+            text-transform: uppercase;
+        }
+        .meta-info {
+            margin: 1cm 0;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .meta-info th {
+            text-align: left;
+            width: 150px;
+            padding: 5px 10px;
+            background-color: #f5f5f5;
+        }
+        .meta-info td {
+            padding: 5px 10px;
+        }
+        .content-section {
+            margin: 1cm 0;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0.5cm 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.2cm;
+        }
+        .content-text {
+            text-align: justify;
+            margin-bottom: 0.5cm;
+        }
+        .approval-section {
+            margin-top: 3cm;
+            page-break-inside: avoid;
+        }
+        .signature-box {
+            margin-top: 1cm;
+            border-top: 1px solid #333;
+            width: 200px;
+            text-align: center;
+            padding-top: 0.2cm;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding: 0.5cm 0;
+        }
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 100px;
+            opacity: 0.1;
+            z-index: -1;
+            color: #000;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% if not document.accept_by %}
+    <div class="watermark">DRAFT</div>
+    {% endif %}
+
+    <div class="header">
+        <div class="document-title">{{ document.title }}</div>
+        <div>{{ document.office_name }}</div>
+        <div>Document ID: {{ document.id }}</div>
+    </div>
+
+    <table class="meta-info">
+        <tr>
+            <th>Date:</th>
+            <td>{{ document.date|date:"F d, Y" }}</td>
+        </tr>
+        <tr>
+            <th>Receiver:</th>
+            <td>{{ document.receiver }}</td>
+        </tr>
+        <tr>
+            <th>Created By:</th>
+            <td>{{ document.post_by.get_full_name|default:document.post_by.username }}</td>
+        </tr>
+        {% if document.accept_by %}
+        <tr>
+            <th>Approved By:</th>
+            <td>{{ document.accept_by.get_full_name|default:document.accept_by.username }}</td>
+        </tr>
+        <tr>
+            <th>Approval Date:</th>
+            <td>{{ document.updated_datetime|date:"F d, Y H:i" }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    <div class="content-section">
+        <div class="section-title">Description</div>
+        <div class="content-text">{{ document.description|linebreaks }}</div>
+    </div>
+
+    <div class="content-section">
+        <div class="section-title">Summary</div>
+        <div class="content-text">{{ document.summary|linebreaks }}</div>
+    </div>
+
+    <div class="content-section">
+        <div class="section-title">Object</div>
+        <div class="content-text">{{ document.object|safe }}</div>
+    </div>
+
+    {% if document.result %}
+    <div class="content-section">
+        <div class="section-title">Results/Comments</div>
+        <div class="content-text">{{ document.result|linebreaks }}</div>
+    </div>
+    {% endif %}
+
+    <div class="approval-section">
+        <div class="signature-box">
+            <div>Approved by</div>
+            {% if document.accept_by %}
+            <div>{{ document.accept_by.get_full_name|default:document.accept_by.username }}</div>
+            <div>{{ document.updated_datetime|date:"F d, Y" }}</div>
+            {% else %}
+            <div>Pending Approval</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated on {{ now|date:"F d, Y H:i" }} | Page <span class="page"></span>
+    </div>
+</body>
+</html>

@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Create{% endif %} Document{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-group.required label:after {
+        content: " *";
+        color: red;
+    }
+    .ck-editor__editable {
+        min-height: 200px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="mb-0">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Document</h2>
+    </div>
+    <div class="card-body">
+        <form method="post" id="documentForm" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="row g-3">
+                <!-- Title -->
+                <div class="col-md-6 form-group required">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                    <input type="text" name="title" id="{{ form.title.id_for_label }}" 
+                           class="form-control {% if form.title.errors %}is-invalid{% endif %}"
+                           value="{{ form.title.value|default:'' }}" required>
+                    {% if form.title.errors %}
+                        <div class="invalid-feedback">{{ form.title.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Office Name -->
+                <div class="col-md-6 form-group required">
+                    <label for="{{ form.office_name.id_for_label }}" class="form-label">Office Name</label>
+                    <input type="text" name="office_name" id="{{ form.office_name.id_for_label }}"
+                           class="form-control {% if form.office_name.errors %}is-invalid{% endif %}"
+                           value="{{ form.office_name.value|default:'' }}" required>
+                    {% if form.office_name.errors %}
+                        <div class="invalid-feedback">{{ form.office_name.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Date -->
+                <div class="col-md-6 form-group required">
+                    <label for="{{ form.date.id_for_label }}" class="form-label">Date</label>
+                    <input type="date" name="date" id="{{ form.date.id_for_label }}"
+                           class="form-control {% if form.date.errors %}is-invalid{% endif %}"
+                           value="{{ form.date.value|date:'Y-m-d' }}" required>
+                    {% if form.date.errors %}
+                        <div class="invalid-feedback">{{ form.date.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Receiver -->
+                <div class="col-md-6 form-group required">
+                    <label for="{{ form.receiver.id_for_label }}" class="form-label">Receiver</label>
+                    <input type="text" name="receiver" id="{{ form.receiver.id_for_label }}"
+                           class="form-control {% if form.receiver.errors %}is-invalid{% endif %}"
+                           value="{{ form.receiver.value|default:'' }}" required>
+                    {% if form.receiver.errors %}
+                        <div class="invalid-feedback">{{ form.receiver.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="col-12 form-group required">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                    <textarea name="description" id="{{ form.description.id_for_label }}"
+                              class="form-control {% if form.description.errors %}is-invalid{% endif %}"
+                              rows="4" required>{{ form.description.value|default:'' }}</textarea>
+                    {% if form.description.errors %}
+                        <div class="invalid-feedback">{{ form.description.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Summary -->
+                <div class="col-12 form-group required">
+                    <label for="{{ form.summary.id_for_label }}" class="form-label">Summary</label>
+                    <textarea name="summary" id="{{ form.summary.id_for_label }}"
+                              class="form-control {% if form.summary.errors %}is-invalid{% endif %}"
+                              rows="4" required>{{ form.summary.value|default:'' }}</textarea>
+                    {% if form.summary.errors %}
+                        <div class="invalid-feedback">{{ form.summary.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Object -->
+                <div class="col-12 form-group required">
+                    <label for="{{ form.object.id_for_label }}" class="form-label">Object</label>
+                    <textarea name="object" id="{{ form.object.id_for_label }}"
+                              class="form-control rich-editor {% if form.object.errors %}is-invalid{% endif %}"
+                              rows="4" required>{{ form.object.value|default:'' }}</textarea>
+                    {% if form.object.errors %}
+                        <div class="invalid-feedback">{{ form.object.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <a href="{% url 'core:document_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.ckeditor.com/ckeditor5/27.1.0/classic/ckeditor.js"></script>
+<script>
+    // Initialize CKEditor
+    ClassicEditor
+        .create(document.querySelector('.rich-editor'))
+        .catch(error => {
+            console.error(error);
+        });
+
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+{% endblock %}

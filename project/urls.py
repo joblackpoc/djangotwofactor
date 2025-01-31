@@ -23,11 +23,25 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('main/', include('main.urls')),
     path('', include('pdf_app.urls')),
+    path('pdf_doc/', include('pdf_doc.urls')),
     path('authentication/', include('authentication.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
 ]
 
 # Add media and static file serving for development
+# if settings.DEBUG:
+#     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+#     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
 if settings.DEBUG:
+    urlpatterns += [
+        path('__debug__/', include('debug_toolbar.urls')),
+    ]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
+# Error handlers
+handler404 = 'pdf_doc.views.handler404'
+handler500 = 'pdf_doc.views.handler500'
+handler403 = 'pdf_doc.views.handler403'

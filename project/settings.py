@@ -40,6 +40,7 @@ SECRET_KEY = get_env_value('SECRET_KEY')
 
 
 DEBUG = True
+TEMPLATE_DEBUG = DEBUG
 #DEBUG = os.getenv('DEBUG') == 'True'
 
 if not DEBUG:
@@ -48,6 +49,16 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    
+# Debug Toolbar Settings
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
+# Debug Toolbar Config
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,
+}
 
 # Additional security settings to use with your SECRET_KEY
 #SECURE_SSL_REDIRECT = True  # Force HTTPS
@@ -75,11 +86,11 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     
     'django_extensions',
-    'django.contrib.humanize'
+    'django.contrib.humanize',
     #'accounts.apps.AccountsConfig',
     'authentication.apps.AuthenticationConfig',
     'main.apps.MainConfig',
-    'pdf_doc.apps.PdfDocConfig',
+    'pdf_doc',
     'pdf_app',
 ]
 
@@ -102,10 +113,12 @@ MIDDLEWARE = [
     # Security Middleware
     'django.middleware.security.SecurityMiddleware',
     # HTTP Strict Transport Security
-    'django.middleware.security.StrictTransportSecurityMiddleware',
+    #'django.middleware.security.StrictTransportSecurityMiddleware',
     'csp.middleware.CSPMiddleware',
 ]
 
+# if DEBUG:
+#     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
 ROOT_URLCONF = 'project.urls'
 
@@ -134,16 +147,38 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#         },
+#         'CONN_MAX_AGE': 60,
+#     }
+# }
+# Database Settings
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
-        'CONN_MAX_AGE': 60,
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'pdf_generator'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
+
+# For development, you can also use SQLite3
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+            'CONN_MAX_AGE' : 60,
+        },
+        
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -173,14 +208,23 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# Content Security Policy
+# CSP_DEFAULT_SRC = ("'self'",)
+# CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")  # For Bootstrap
+# CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")  # For Bootstrap and JS
+# CSP_IMG_SRC = ("'self'", "data:", "https:")
+# CSP_FONT_SRC = ("'self'", "https://cdn.jsdelivr.net")
+
 # Session Settings
 SESSION_COOKIE_AGE = 300  # 5 minutes in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_SECURE = True  # Use only with HTTPS
+#SESSION_COOKIE_SECURE = True  # Use only with HTTPS
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SAMESITE = 'Strict'
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+SESSION_TIMEOUT_REDIRECT = 'authentication:login'
 
 # CSRF Settings
 #CSRF_COOKIE_SECURE = True    # Use only with HTTPS
@@ -217,7 +261,7 @@ MEDIA_ROOT = BASE_DIR / 'media/'
 
 LOGIN_URL = 'authentication:login'
 LOGIN_REDIRECT_URL = 'authentication:profile_detail'
-#LOGOUT_REDIRECT_URL = 'accounts:login'
+LOGOUT_REDIRECT_URL = 'authentication:login'
 
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
@@ -226,6 +270,10 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = get_env_value('DEFAULT_FROM_EMAIL')
+
+LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
 
 # Logging Configuration
 LOGGING = {
@@ -241,47 +289,41 @@ LOGGING = {
             'style': '{',
         },
     },
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        },
-    },
     'handlers': {
         'console': {
-            'level': 'INFO',
-            'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
-            'formatter': 'simple'
+            'formatter': 'simple',
         },
         'file': {
-            'level': 'WARNING',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'django.log'),
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
             'formatter': 'verbose',
         },
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+        'security': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'security.log'),
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file', 'mail_admins'],
-            'level': 'INFO',
+            'handlers': ['console', 'file'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': True,
         },
         'django.security': {
-            'handlers': ['file', 'mail_admins'],
-            'level': 'WARNING',
-            'propagate': True,
+            'handlers': ['security'],
+            'level': 'INFO',
+            'propagate': False,
         },
-        'pdf_doc': {
+        'core': {
             'handlers': ['console', 'file'],
             'level': 'INFO',
+            'propagate': True,
         },
     },
 }
@@ -298,7 +340,8 @@ CACHES = {
             'CONNECTION_POOL_CLASS_KWARGS': {
                 'max_connections': 50,
                 'timeout': 20,
-            }
+            },
+            'SSL': not DEBUG,
         }
     }
 }

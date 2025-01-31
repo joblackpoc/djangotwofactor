@@ -1,13 +1,15 @@
 from django import forms
 from .models import Document
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Row, Column
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = ['title', 'office_name', 'date', 'receiver', 
-                 'description', 'summary', 'object']
+        fields = [
+            'title', 'office_name', 'date', 'receiver',
+            'description', 'summary', 'object'
+        ]
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
             'description': forms.Textarea(attrs={'rows': 4}),
@@ -15,25 +17,40 @@ class DocumentForm(forms.ModelForm):
             'object': forms.Textarea(attrs={'rows': 4}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Submit'))
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        
+        if date and date > timezone.now().date():
+            raise ValidationError({
+                'date': 'Date cannot be in the future'
+            })
+        return cleaned_data
 
-class DocumentAcceptForm(forms.ModelForm):
+class DocumentApprovalForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = ['is_accepted', 'result']
+        fields = ['status', 'result']
         widgets = {
             'result': forms.Textarea(attrs={'rows': 4}),
         }
 
+    def clean(self):
+        cleaned_data = super().clean()
+        status = cleaned_data.get('status')
+        result = cleaned_data.get('result')
+
+        if status in ['accepted', 'rejected'] and not result:
+            raise ValidationError({
+                'result': 'Result is required when accepting or rejecting a document'
+            })
+        return cleaned_data
+
 class DocumentSearchForm(forms.Form):
-    search_query = forms.CharField(required=False)
+    search = forms.CharField(required=False)
     date_from = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
     date_to = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
     status = forms.ChoiceField(
-        choices=[('all', 'All'), ('accepted', 'Accepted'), ('pending', 'Pending')],
+        choices=[('', 'All')] + Document._meta.get_field('status').choices,
         required=False
     )
